@@ -7,17 +7,86 @@
 //
 
 import UIKit
+import BDBOAuth1Manager
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    var storyboard = UIStoryboard(name: "Main", bundle: nil)
+    let tabBarController = UITabBarController()
 
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
+        UIApplication.sharedApplication().statusBarStyle = .LightContent
+        
+        if User.currentUser != nil {
+            print("There is a current user")
+            
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            let vc = storyboard.instantiateViewControllerWithIdentifier("TweetsNavigationController")
+            window?.rootViewController = vc
+            window?.makeKeyAndVisible()
+            
+        } 
+        
+        
+        NSNotificationCenter.defaultCenter().addObserverForName(User.userDidLogoutNotification, object: nil, queue: NSOperationQueue.mainQueue()) { (NSNotification) -> Void in
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            let vc = storyboard.instantiateInitialViewController()
+            self.window?.rootViewController = vc
+        }
         return true
     }
+    
+    func userDidLogout() {
+        print("trying to log user out and switch view controllers as well")
+        var vc = storyboard.instantiateViewControllerWithIdentifier("ViewController") as? UIViewController
+        window?.rootViewController = vc
+    }
+    
+    func setupTabBars() {
+        // Set up the search View Controller
+        let tweetsNavigationController = storyboard.instantiateViewControllerWithIdentifier("TweetsNavigationController") as! UINavigationController
+        let tweetsViewController = tweetsNavigationController.topViewController as! TweetsViewController
+        tweetsNavigationController.tabBarItem.title = "Home"
+        tweetsNavigationController.tabBarItem.image = UIImage(named: "home")
+        
+        
+        //Customize Popular navigation bar UI
+       // tweetsNavigationController.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName: UIColor(rgba: "#55acee").CGColor]
+        
+        /* Create an Image View to replace the Title View */
+        var imageView: UIImageView = UIImageView(frame: CGRectMake(0.0, 0.0, 40.0, 40.0))
+        
+        imageView.contentMode = UIViewContentMode.ScaleAspectFit
+        
+        /* Load an image. Be careful, this image will be cached */
+        var image: UIImage = UIImage(named: "Icon-Small-50")!
+        
+        /* Set the image of the Image View */
+        imageView.image = image
+        
+        /* Set the Title View */
+        tweetsNavigationController.navigationBar.topItem?.titleView = imageView
+        
+        // Set up the search View Controller
+        let meViewController = storyboard.instantiateViewControllerWithIdentifier("ProfileViewController")
+        meViewController.tabBarItem.title = "Me"
+        meViewController.tabBarItem.image = UIImage(named: "me")
+        
+        // Set up the Tab Bar Controller to have two tabs
+        tabBarController.viewControllers = [tweetsNavigationController, meViewController]
+       // UITabBar.appearance().tintColor = UIColor(rgba: "#55acee")
+        //    UITabBar.appearance().barTintColor = UIColor.blackColor()
+        
+        // Make the Tab Bar Controller the root view controller
+        window?.rootViewController = tabBarController
+        window?.makeKeyAndVisible()
+        
+    }
+
 
     func applicationWillResignActive(application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
@@ -40,6 +109,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillTerminate(application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
+    
+    func application(app: UIApplication, openURL url: NSURL, options: [String : AnyObject]) -> Bool {
+        print(url.description)
+        
+        TwitterClient.sharedInstance.hanfleOpenUrl(url)
+       
+    
+        return true
+        
+    }
+    
+
 
 
 }
