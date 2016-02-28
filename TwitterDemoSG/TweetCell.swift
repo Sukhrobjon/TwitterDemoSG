@@ -31,8 +31,8 @@ class TweetCell: UITableViewCell {
     var tweet : Tweet! {
         didSet {
             tweetTextLabel.text = tweet.text
-            nameLabel.text = tweet.user?.name
-            screennameLabel.text = "@\(tweet.user!.screenname)"
+            nameLabel.text = tweet.user!.name
+            screennameLabel.text = "@\(tweet.user?.screenname)"
             
             retweetCountLabel.text = "\(tweet.retweetCount as! Int)"
             

@@ -42,7 +42,7 @@ class User: NSObject {
         print(User.currentUser)
         TwitterClient.sharedInstance.requestSerializer.removeAccessToken();
         print("is this getting called?")
-        NSNotificationCenter.defaultCenter().postNotificationName(userDidLogoutNotification, object: nil);
+        NSNotificationCenter.defaultCenter().postNotificationName(User.userDidLogoutNotification, object: nil);
     }
     
     
